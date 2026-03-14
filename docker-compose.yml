@@ -1,0 +1,21 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: ai_knowledge_db
+    environment:
+      POSTGRES_DB: ai_knowledge_assistant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+
+  api:
+    build: .
+    container_name: ai_knowledge_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    depends_on:
+      - db
