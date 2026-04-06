@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -43,3 +44,42 @@ def list_documents(db: Session = Depends(get_db)):
     ).scalars().all()
 
     return documents
+
+
+@router.get("/{document_id}", response_model=DocumentResponse)
+def get_document(document_id: str, db: Session = Depends(get_db)):
+    # Busca o documento pelo ID. Se não existir, retorna 404.
+    document = db.get(Document, document_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found.")
+    return document
+
+
+@router.delete("/{document_id}", status_code=204)
+def delete_document(document_id: str, db: Session = Depends(get_db)):
+    document = db.get(Document, document_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    # Primeiro apaga do disco, depois do banco.
+    # Se invertêssemos a ordem e o disco falhasse, o banco ficaria inconsistente.
+    StorageService().delete_file(document.stored_name)
+    db.delete(document)
+    db.commit()
+
+
+@router.get("/{document_id}/download")
+def download_document(document_id: str, db: Session = Depends(get_db)):
+    document = db.get(Document, document_id)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found.")
+
+    file_path = StorageService().get_file_path(document.stored_name)
+
+    # FileResponse serve o arquivo diretamente.
+    # filename= define o nome que o usuário vê ao baixar.
+    return FileResponse(
+        path=file_path,
+        media_type=document.content_type,
+        filename=document.original_name
+    )

@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Variáveis de ambiente — nunca subir credenciais
+.env
+
+# Arquivos enviados pelos usuários
+uploads/*
+!uploads/.gitkeep
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# SQLite (banco temporário de testes)
+*.db
+
+# IDEs
+.vscode/
+.idea/

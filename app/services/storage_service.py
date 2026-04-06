@@ -21,3 +21,11 @@ class StorageService:
             buffer.write(content)
 
         return stored_name, file_path, len(content)
+
+    def delete_file(self, stored_name: str) -> None:
+        file_path = os.path.join(settings.upload_dir, stored_name)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    def get_file_path(self, stored_name: str) -> str:
+        return os.path.join(settings.upload_dir, stored_name)
